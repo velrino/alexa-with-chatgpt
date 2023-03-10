@@ -5,10 +5,9 @@
  * */
 const Alexa = require('ask-sdk-core');
 const { Configuration, OpenAIApi } = require('openai');
-const keys = require('./keys');
 
 const config = new Configuration({
-    apiKey: keys.OPEN_AI_KEY
+    apiKey: "OPEN_API_KEY"
 });
 
 const openai = new OpenAIApi(config);
