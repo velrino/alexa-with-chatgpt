@@ -5,9 +5,10 @@
  * */
 const Alexa = require('ask-sdk-core');
 const { Configuration, OpenAIApi } = require('openai');
+const keys = require('./keys');
 
 const config = new Configuration({
-    apiKey: "OPEN_API_KEY"
+    apiKey: keys.OPEN_AI_KEY
 });
 
 const openai = new OpenAIApi(config);
@@ -59,7 +60,7 @@ const LaunchRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speakOutput = 'Bem vindo ao chat GPT  "Open ei ai"! o que deseja saber?';
+        const speakOutput = 'Bem vindo ao chat GPT  "Open ei ai"!';
         
         if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL']) {
             datasource.headlineTemplateData.properties.textContent.primaryText.text = "Bem vindo ao Modo Avançado."
@@ -85,22 +86,17 @@ const AskOpenAIIntentHandler = {
         const question =
             Alexa.getSlotValue(handlerInput.requestEnvelope, 'question');
 
-        const response = await openai.createCompletion({
-            model: 'text-davinci-003',
-            prompt: question,
-            temperature: 0,
-            max_tokens: 1500,
-            top_p: 1,
-            frequency_penalty: 0.0,
-            presence_penalty: 0.0
+        const response = await openai.createChatCompletion({
+          model: "gpt-3.5-turbo",
+          messages: [{role: "user", content: question}],
         });
 
-        const speakOutput = response.data.choices[0].text +
+        const speakOutput = response.data.choices[0].message.content.trim() +
             '.\nGostaria de perguntar mais alguma coisa?';
             
         if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL']) {
             
-            datasource.headlineTemplateData.properties.textContent.primaryText.text = response.data.choices[0].text
+            datasource.headlineTemplateData.properties.textContent.primaryText.text = response.data.choices[0].message.content;
             
             // generate the APL RenderDocument directive that will be returned from your skill
             const aplDirective = createDirectivePayload(DOCUMENT_ID, datasource);
